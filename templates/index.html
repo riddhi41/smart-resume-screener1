@@ -1,0 +1,512 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Resume Screener</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-section h3::before {
+            content: "";
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+
+        .file-upload {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px;
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            background: #f8f9ff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #667eea;
+        }
+
+        .file-label:hover {
+            background: #e8ecff;
+            border-color: #764ba2;
+            color: #764ba2;
+        }
+
+        .file-name {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f4f8;
+            border-radius: 5px;
+            font-size: 0.9em;
+            color: #555;
+            display: none;
+        }
+
+        .file-name.active {
+            display: block;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 1px;
+            background: #e0e0e0;
+        }
+
+        .divider span {
+            position: relative;
+            background: white;
+            padding: 0 15px;
+            color: #999;
+            font-weight: 500;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1em;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            display: none;
+            margin-top: 30px;
+            padding: 30px;
+            background: #f8f9ff;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .result.active {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .score-display {
+            text-align: center;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            border: 8px solid;
+            position: relative;
+        }
+
+        .score-value {
+            font-size: 3em;
+            font-weight: 700;
+        }
+
+        .score-max {
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .score-rating {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .details {
+            margin-top: 20px;
+        }
+
+        .detail-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .detail-item h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .detail-item p {
+            color: #666;
+            line-height: 1.6;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .error {
+            display: none;
+            padding: 15px;
+            background: #fee;
+            border-left: 4px solid #e53e3e;
+            border-radius: 5px;
+            color: #c53030;
+            margin-top: 20px;
+        }
+
+        .error.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Smart Resume Screener</h1>
+            <p>Upload your resume and job description to get an instant fit score</p>
+        </div>
+
+        <div class="content">
+            <form id="screeningForm" enctype="multipart/form-data">
+                <div class="input-section">
+                    <h3>Resume</h3>
+                    <div class="file-upload">
+                        <div class="file-input-wrapper">
+                            <input type="file" id="resumeFile" name="resume_file" accept=".pdf,.docx,.txt">
+                            <label for="resumeFile" class="file-label">
+                                📄 Choose Resume File (PDF, DOCX, TXT)
+                            </label>
+                        </div>
+                        <div id="resumeFileName" class="file-name"></div>
+                    </div>
+                    
+                    <div class="divider"><span>OR</span></div>
+                    
+                    <textarea id="resumeText" name="resume_text" rows="6" placeholder="Paste your resume text here..."></textarea>
+                </div>
+
+                <div class="input-section">
+                    <h3>Job Description</h3>
+                    <div class="file-upload">
+                        <div class="file-input-wrapper">
+                            <input type="file" id="jobFile" name="job_file" accept=".pdf,.docx,.txt">
+                            <label for="jobFile" class="file-label">
+                                📋 Choose Job Description File (PDF, DOCX, TXT)
+                            </label>
+                        </div>
+                        <div id="jobFileName" class="file-name"></div>
+                    </div>
+                    
+                    <div class="divider"><span>OR</span></div>
+                    
+                    <textarea id="jobText" name="job_description" rows="6" placeholder="Paste the job description here..."></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    Analyze Resume Fit
+                </button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Analyzing resume and job description...</p>
+            </div>
+
+            <div class="error" id="error"></div>
+
+            <div class="result" id="result">
+                <div class="score-display">
+                    <div class="score-circle" id="scoreCircle">
+                        <div class="score-value" id="scoreValue">0</div>
+                        <div class="score-max">/10</div>
+                    </div>
+                    <div class="score-rating" id="scoreRating"></div>
+                </div>
+
+                <div class="details">
+                    <div class="detail-item">
+                        <h4>📄 Resume Preview</h4>
+                        <p id="resumePreview"></p>
+                    </div>
+                    <div class="detail-item">
+                        <h4>💼 Job Description Preview</h4>
+                        <p id="jobPreview"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('screeningForm');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const error = document.getElementById('error');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        const resumeFile = document.getElementById('resumeFile');
+        const jobFile = document.getElementById('jobFile');
+        const resumeFileName = document.getElementById('resumeFileName');
+        const jobFileName = document.getElementById('jobFileName');
+
+        resumeFile.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                resumeFileName.textContent = `Selected: ${e.target.files[0].name}`;
+                resumeFileName.classList.add('active');
+            }
+        });
+
+        jobFile.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                jobFileName.textContent = `Selected: ${e.target.files[0].name}`;
+                jobFileName.classList.add('active');
+            }
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            
+            loading.classList.add('active');
+            result.classList.remove('active');
+            error.classList.remove('active');
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch('/score_resume', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('scoreValue').textContent = data.fit_score;
+                    document.getElementById('scoreRating').textContent = data.rating;
+                    document.getElementById('scoreRating').style.color = data.color;
+                    document.getElementById('scoreCircle').style.borderColor = data.color;
+                    document.getElementById('resumePreview').textContent = data.resume_text;
+                    document.getElementById('jobPreview').textContent = data.job_description;
+                    
+                    result.classList.add('active');
+                } else {
+                    error.textContent = data.error || 'An error occurred';
+                    error.classList.add('active');
+                }
+            } catch (err) {
+                error.textContent = 'Failed to connect to server. Please try again.';
+                error.classList.add('active');
+            } finally {
+                loading.classList.remove('active');
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+<!--<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Resume Screener</title>
+</head>
+<body>
+    <h1>Smart Resume Screener</h1>
+    <form action="/score_resume" method="post">
+        <label>Resume Text:</label><br>
+        <textarea name="resume_text" rows="6" cols="60"></textarea><br><br>
+
+        <label>Job Description:</label><br>
+        <textarea name="job_description" rows="6" cols="60"></textarea><br><br>
+
+        <input type="submit" value="Get Fit Score">
+    </form>
+
+    {% if fit_score %}
+        <h2>Result</h2>
+        <p><b>Resume:</b> {{ resume_text }}</p>
+        <p><b>Job Description:</b> {{ job_description }}</p>
+        <p><b>Fit Score:</b> {{ fit_score }} / 10</p>
+    {% endif %}
+</body>
+</html> -->
