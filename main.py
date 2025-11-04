@@ -15,7 +15,7 @@ templates = Jinja2Templates(directory="templates")
 
 # Load your fine-tuned Hugging Face model
 try:
-    scorer = pipeline("text-classification", model="riddhii29/results")
+    scorer = none #pipeline("text-classification", model="riddhii29/results")
 except Exception as e:
     print(f"Warning: Could not load model. Using demo mode. Error: {e}")
     scorer = None
@@ -366,4 +366,5 @@ async def score_resume(
 
 @app.get("/health")
 async def health_check():
+
     return {"status": "healthy", "model_loaded": scorer is not None}'''
